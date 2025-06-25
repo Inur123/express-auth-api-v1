@@ -12,7 +12,7 @@ function authMiddleware(req, res, next) {
 
   // Cek apakah token sudah di-blacklist
   if (blacklistStore.has(token)) {
-    return res.status(401).json({ message: 'Token sudah logout (ter-blacklist)' });
+    return res.status(401).json({ message: 'Token sudah logout' });
   }
 
   try {

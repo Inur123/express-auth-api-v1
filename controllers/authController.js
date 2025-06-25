@@ -56,3 +56,44 @@ exports.login = async (req, res) => {
 
   res.json({ token });
 };
+
+// UPDATE
+exports.update = async (req, res) => {
+  const id = req.user.id; // Ambil dari token
+  const { name, email, password } = req.body;
+
+  // Ambil data user lama
+  const { data: existingUser, error: fetchError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !existingUser) {
+    return res.status(404).json({ message: 'User tidak ditemukan' });
+  }
+
+  // Siapkan data update
+  const updatedData = {
+    name: name || existingUser.name,
+    email: email || existingUser.email,
+  };
+
+  if (password) {
+    updatedData.password = await bcrypt.hash(password, 10);
+  }
+
+  // Lakukan update
+  const { error: updateError } = await supabase
+    .from('users')
+    .update(updatedData)
+    .eq('id', id);
+
+  if (updateError) {
+    return res.status(500).json({ message: 'Gagal memperbarui data', error: updateError });
+  }
+
+  res.json({ message: 'Data berhasil diperbarui' });
+};
+
+
